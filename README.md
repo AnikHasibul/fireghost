@@ -1,6 +1,14 @@
 # FireGhost
 A tool to check and sniff firebase config. Also generates html page to dump firebase databases.
 
+# Installation:
+
+Install directly with `go install`
+
+```sh
+$ go install -v github.com/anikhasibul/fireghost
+```
+
 # Usage:
 
 This command will sniff the config of given target.
