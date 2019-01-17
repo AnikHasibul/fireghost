@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-type fireghost struct {
+type fireGhost struct {
 	err           error
 	printToStdout bool
 	serveHTTP     bool
@@ -27,44 +27,44 @@ type fireghost struct {
 }
 
 func main() {
-	f := new(fireghost)
-	f.parseFlags().
+	fire := new(fireGhost)
+	fire.parseFlags().
 		fetchTarget().
 		hasFirebase().
 		grabConfig().
 		printConfig().
 		saveFile().
 		serveFile()
-	if f.err != nil {
-		fmt.Println(f.err)
+	if fire.err != nil {
+		fmt.Println(fire.err)
 	}
 }
 
 // parseFlags parses flags.
 // and decides what to do
-func (f *fireghost) parseFlags() *fireghost {
-	if f.err != nil {
-		return f
+func (fire *fireGhost) parseFlags() *fireGhost {
+	if fire.err != nil {
+		return fire
 	}
 	// define flags
-	flag.IntVar(&f.port, "p", 1339, "port to listen.")
-	flag.StringVar(&f.target, "t", "", "target host.")
-	flag.BoolVar(&f.printToStdout, "w", true, "Print result to stdout")
-	flag.BoolVar(&f.serveHTTP, "s", true, "Serve the generated page.")
+	flag.IntVar(&fire.port, "p", 1339, "port to listen.")
+	flag.StringVar(&fire.target, "t", "", "target host.")
+	flag.BoolVar(&fire.printToStdout, "w", true, "Print result to stdout")
+	flag.BoolVar(&fire.serveHTTP, "s", true, "Serve the generated page.")
 	// parse and return
 	flag.Parse()
-	return f
+	return fire
 }
 
 // fetchTarget fetches the target
-func (f *fireghost) fetchTarget() *fireghost {
-	if f.err != nil {
-		return f
+func (fire *fireGhost) fetchTarget() *fireGhost {
+	if fire.err != nil {
+		return fire
 	}
 	// validate target
-	if f.target == "" {
-		f.err = errors.New("Target can't be empty!")
-		return f
+	if fire.target == "" {
+		fire.err = errors.New("Target can't be empty!")
+		return fire
 	}
 	// ignore https cryoto errors
 	tr := &http.Transport{
@@ -77,45 +77,45 @@ func (f *fireghost) fetchTarget() *fireghost {
 	}
 	// Get the page
 	var resp *http.Response
-	resp, f.err = client.Get(f.target)
-	if f.err != nil {
-		return f
+	resp, fire.err = client.Get(fire.target)
+	if fire.err != nil {
+		return fire
 	}
 	// read the response
-	f.body, f.err = ioutil.ReadAll(resp.Body)
-	if f.err != nil {
-		return f
+	fire.body, fire.err = ioutil.ReadAll(resp.Body)
+	if fire.err != nil {
+		return fire
 	}
-	return f
+	return fire
 }
 
 // hasFirebase checks if the target uses firebase
-func (f *fireghost) hasFirebase() *fireghost {
-	if f.err != nil {
-		return f
+func (fire *fireGhost) hasFirebase() *fireGhost {
+	if fire.err != nil {
+		return fire
 	}
 	// regex to check firebase plugin
 	r, err := regexp.Compile(
 		`<script src="https:\/\/www\.gstatic\.com\/firebasejs\/.*?\/firebase\.js"><\/script>`,
 	)
 	if err != nil {
-		f.err = err
-		return f
+		fire.err = err
+		return fire
 	}
-	if r.Match(f.body) {
-		return f
+	if r.Match(fire.body) {
+		return fire
 	}
-	f.err = errors.New("Target doesn't have firebase plugin!")
-	return f
+	fire.err = errors.New("Target doesn't have firebase plugin!")
+	return fire
 }
 
 // grabConfig grabs the configs
-func (f *fireghost) grabConfig() *fireghost {
-	if f.err != nil {
-		return f
+func (fire *fireGhost) grabConfig() *fireGhost {
+	if fire.err != nil {
+		return fire
 	}
 	// extract firebase config
-	body := string(f.body)
+	body := string(fire.body)
 	s := strings.Index(
 		body,
 		"// Initialize Firebase",
@@ -125,72 +125,72 @@ func (f *fireghost) grabConfig() *fireghost {
 		"firebase.initializeApp",
 	)
 	if s < 0 || e < 0 {
-		f.err = errors.New("Target uses firebase, but fireghost couldn't grab the config")
-		return f
+		fire.err = errors.New("Target uses firebase, but fireGhost couldn't grab the config")
+		return fire
 	}
-	f.result = fmt.Sprintf("%s%s",
+	fire.result = fmt.Sprintf("%s%s",
 		string(body[s:e]),
 		"firebase.initializeApp(config);",
 	)
-	return f
+	return fire
 }
 
 // printConfig saves and prints the config
-func (f *fireghost) printConfig() *fireghost {
-	if f.err != nil {
-		return f
+func (fire *fireGhost) printConfig() *fireGhost {
+	if fire.err != nil {
+		return fire
 	}
-	if f.printToStdout {
-		fmt.Println(f.result)
+	if fire.printToStdout {
+		fmt.Println(fire.result)
 	}
-	return f
+	return fire
 }
 
 // saveFile saves the html file
-func (f *fireghost) saveFile() *fireghost {
-	if f.err != nil {
-		return f
+func (fire *fireGhost) saveFile() *fireGhost {
+	if fire.err != nil {
+		return fire
 	}
-	file, err := os.Create(url.PathEscape(f.target) + ".html")
+	file, err := os.Create(url.PathEscape(fire.target) + ".html")
 	if err != nil {
-		f.err = err
-		return f
+		fire.err = err
+		return fire
 	}
-	f.generateHTML(file)
-	return f
+	fire.generateHTML(file)
+	return fire
 }
 
 // serveFile serves the html page
-func (f *fireghost) serveFile() *fireghost {
-	if f.err != nil {
-		return f
+func (fire *fireGhost) serveFile() *fireGhost {
+	if fire.err != nil {
+		return fire
 	}
-	if !f.serveHTTP {
-		return f
+	if !fire.serveHTTP {
+		return fire
 	}
-	fmt.Printf("Serving on localhost:%d\n", f.port)
+	fmt.Printf("Serving on localhost:%d\n", fire.port)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		f.generateHTML(w)
-		if f.err != nil {
-			fmt.Fprintln(w, f.err)
+		fire.generateHTML(w)
+		if fire.err != nil {
+			fmt.Fprintln(w, fire.err)
 		}
 	})
-	f.err = http.ListenAndServe(fmt.Sprintf(":%d", f.port), nil)
-	return f
+	fire.err = http.ListenAndServe(fmt.Sprintf(":%d", fire.port), nil)
+	return fire
 }
 
 // generateHTML generates html page
-func (f *fireghost) generateHTML(w io.Writer) *fireghost {
-	if f.err != nil {
-		return f
+func (fire *fireGhost) generateHTML(w io.Writer) *fireGhost {
+	if fire.err != nil {
+		return fire
 	}
 	type Template struct {
 		Host   string
 		Config string
 	}
 	var tmpl = Template{
-		Host:   f.target,
-		Config: f.result,
+		Host:   fire.target,
+		Config: fire.result,
 	}
 	page := `
 	<html>
@@ -234,12 +234,12 @@ download(JSON.stringify(total), document.title+'.json', 'application/json')
 	`
 	t, err := template.New("todos").Parse(page)
 	if err != nil {
-		f.err = err
-		return f
+		fire.err = err
+		return fire
 	}
-	f.err = t.Execute(w, tmpl)
-	if f.err != nil {
-		return f
+	fire.err = t.Execute(w, tmpl)
+	if fire.err != nil {
+		return fire
 	}
-	return f
+	return fire
 }
