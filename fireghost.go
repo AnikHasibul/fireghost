@@ -95,14 +95,23 @@ func (fire *fireGhost) hasFirebase() *fireGhost {
 		return fire
 	}
 	// regex to check firebase plugin
-	r, err := regexp.Compile(
+	updated, err := regexp.Compile(
 		`<script src="https:\/\/www\.gstatic\.com\/firebasejs\/.*?\/firebase\.js"><\/script>`,
 	)
 	if err != nil {
 		fire.err = err
 		return fire
 	}
-	if r.Match(fire.body) {
+	backdated, err := regexp.Compile(
+		`<script.*?src=".*?\/firebase\.js"><\/script>`,
+	)
+	if err != nil {
+		fire.err = err
+		return fire
+	}
+	if updated.Match(fire.body) {
+		return fire
+	} else if backdated.Match(fire.body) {
 		return fire
 	}
 	fire.err = errors.New("Target doesn't have firebase plugin!")
