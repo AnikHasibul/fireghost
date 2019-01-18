@@ -127,9 +127,9 @@ func (fire *fireGhost) grabConfig() *fireGhost {
 	body := string(fire.body)
 	s := strings.Index(
 		body,
-		"// Initialize Firebase",
+		"var config = {",
 	)
-	e := strings.LastIndex(
+	e := strings.Index(
 		body,
 		"firebase.initializeApp",
 	)
